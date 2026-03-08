@@ -29,6 +29,7 @@ test/
 
 # MATLAB Scripts
 *.m
+sources/
 
 # MacOS System Files
 .DS_Store
