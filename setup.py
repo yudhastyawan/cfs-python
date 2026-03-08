@@ -7,7 +7,7 @@ with open(os.path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="cfs-python",
-    version="0.1.0",
+    version="0.1.1",
     description="Python-based Coulomb Stress Change UI and API",
     long_description=long_description,
     long_description_content_type="text/markdown",

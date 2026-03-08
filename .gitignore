@@ -27,6 +27,9 @@ cfs-test-env/
 cache/
 test/
 
+# MATLAB Scripts
+*.m
+
 # MacOS System Files
 .DS_Store
 .AppleDouble
