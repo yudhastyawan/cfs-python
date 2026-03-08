@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coulomb Visualizer Pro</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js" charset="utf-8"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-layer-group"></i> Coulomb CFS</h2>
+            </div>
+
+            <div class="sidebar-tabs">
+                <button class="side-tab active" data-target="upload-section">Upload</button>
+                <button class="side-tab" data-target="create-section">Creator</button>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- Upload Section -->
+                <div id="upload-section" class="side-pane active">
+                    <form id="calc-form" enctype="multipart/form-data">
+                        <div class="form-group file-upload">
+                            <label for="file">Source File (.inp / .dat)</label>
+                            <div class="file-drop-area" id="file-drop-area">
+                                <span class="file-msg">Choose a file or drag it here</span>
+                                <input class="file-input" type="file" id="file" name="file" required
+                                    accept=".inp,.dat,.txt">
+                            </div>
+                        </div>
+
+                        <div class="form-group styled-select">
+                            <label for="calc_type">Calculation Mode</label>
+                            <select id="calc_type" name="calc_type">
+                                <option value="coulomb">Grid - Coulomb Stress</option>
+                                <option value="deformation">Grid - Deformation</option>
+                                <option value="batch">Batch (File-based)</option>
+                                <option value="single">Single Target Point</option>
+                            </select>
+                        </div>
+
+                        <div id="grid-params" class="form-row">
+                            <div class="form-group">
+                                <label title="Min X (km) / Longitude">Min X/Lon</label>
+                                <input type="number" step="0.001" id="grid_min_x" name="grid_min_x" value="-50.0">
+                            </div>
+                            <div class="form-group">
+                                <label title="Max X (km) / Longitude">Max X/Lon</label>
+                                <input type="number" step="0.001" id="grid_max_x" name="grid_max_x" value="50.0">
+                            </div>
+                        </div>
+                        <div id="grid-params-y" class="form-row">
+                            <div class="form-group">
+                                <label title="Min Y (km) / Latitude">Min Y/Lat</label>
+                                <input type="number" step="0.001" id="grid_min_y" name="grid_min_y" value="-50.0">
+                            </div>
+                            <div class="form-group">
+                                <label title="Max Y (km) / Latitude">Max Y/Lat</label>
+                                <input type="number" step="0.001" id="grid_max_y" name="grid_max_y" value="50.0">
+                            </div>
+                        </div>
+                        <div id="grid-params-inc" class="form-row">
+                            <div class="form-group">
+                                <label title="Grid Spacing">Spacing (km)</label>
+                                <input type="number" step="0.01" id="grid_inc" name="grid_inc" value="5.0">
+                            </div>
+                            <div class="form-group">
+                                <label title="Calculation Depth">Depth (km)</label>
+                                <input type="number" step="0.1" id="calc_depth" name="calc_depth" value="5.0">
+                            </div>
+                        </div>
+
+                        <div class="form-row" id="receiver-params">
+                            <div class="form-group">
+                                <label title="Receiver Strike (°)">R. Strike</label>
+                                <input type="number" step="0.1" id="receiver_strike" name="receiver_strike"
+                                    value="30.0">
+                            </div>
+                            <div class="form-group">
+                                <label title="Receiver Dip (°)">R. Dip</label>
+                                <input type="number" step="0.1" id="receiver_dip" name="receiver_dip" value="90.0">
+                            </div>
+                            <div class="form-group">
+                                <label title="Receiver Rake (°)">R. Rake</label>
+                                <input type="number" step="0.1" id="receiver_rake" name="receiver_rake" value="180.0">
+                            </div>
+                        </div>
+
+                        <div class="form-group file-upload hidden" id="batch-params">
+                            <label for="batch_file">Receiver Batch File (.dat)</label>
+                            <div class="file-drop-area batch-drop-area" id="batch-drop-area">
+                                <span class="file-msg batch-file-msg">Drop batch file here</span>
+                                <input class="file-input" type="file" id="batch_file" name="batch_file"
+                                    accept=".inp,.dat,.txt">
+                            </div>
+                        </div>
+
+                        <div class="form-row hidden" id="single-pos-params">
+                            <div class="form-group">
+                                <label>X (km)</label>
+                                <input type="number" step="0.01" name="single_x" value="0.0">
+                            </div>
+                            <div class="form-group">
+                                <label>Y (km)</label>
+                                <input type="number" step="0.01" name="single_y" value="0.0">
+                            </div>
+                            <div class="form-group">
+                                <label>Z (km)</label>
+                                <input type="number" step="0.01" name="single_z" value="5.0">
+                            </div>
+                        </div>
+                        <div class="form-row hidden" id="single-ang-params">
+                            <div class="form-group">
+                                <label>Strike</label>
+                                <input type="number" step="0.1" name="single_strike" value="30.0">
+                            </div>
+                            <div class="form-group">
+                                <label>Dip</label>
+                                <input type="number" step="0.1" name="single_dip" value="90.0">
+                            </div>
+                            <div class="form-group">
+                                <label>Rake</label>
+                                <input type="number" step="0.1" name="single_rake" value="180.0">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="submit-btn" style="margin-top: 1.5rem;">
+                            <span class="btn-text">Run Calculation</span>
+                            <span class="spinner hidden"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Creator Section -->
+                <div id="create-section" class="side-pane">
+                    <form id="creator-form">
+                        <h3 class="creator-heading">Global Variables</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Poisson's Ratio</label>
+                                <input type="number" step="0.01" id="c_pr1" value="0.25">
+                            </div>
+                            <div class="form-group">
+                                <label>Friction Coeff.</label>
+                                <input type="number" step="0.01" id="c_fric" value="0.4">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Calc Depth (km)</label>
+                                <input type="number" step="0.1" id="c_depth" value="5.0">
+                            </div>
+                            <div class="form-group">
+                                <label>Young's (bar)</label>
+                                <input type="number" step="1" id="c_young" value="800000">
+                            </div>
+                        </div>
+
+                        <h3 class="creator-heading">Grid Parameters</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>X-Start (km)</label>
+                                <input type="number" step="0.1" id="c_xs" value="-50">
+                            </div>
+                            <div class="form-group">
+                                <label>X-Fin (km)</label>
+                                <input type="number" step="0.1" id="c_xf" value="50">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Y-Start (km)</label>
+                                <input type="number" step="0.1" id="c_ys" value="-50">
+                            </div>
+                            <div class="form-group">
+                                <label>Y-Fin (km)</label>
+                                <input type="number" step="0.1" id="c_yf" value="50">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>X-Inc (km)</label>
+                                <input type="number" step="0.1" id="c_xinc" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label>Y-Inc (km)</label>
+                                <input type="number" step="0.1" id="c_yinc" value="5">
+                            </div>
+                        </div>
+
+                        <h3 class="creator-heading">Fault Sources</h3>
+                        <div id="faults-container"></div>
+                        <button type="button" class="btn-secondary btn-sm" id="btn-add-fault"
+                            style="margin-bottom: 1rem;">
+                            <i class="fas fa-plus"></i> Add Fault Segment
+                        </button>
+
+                        <button type="submit" class="btn-primary" id="btn-create-submit">
+                            <i class="fas fa-cog"></i> Run Calculation
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="status-panel" class="status-panel hidden glass-panel">
+                <p id="status-text">Ready</p>
+                <div class="progress-bar hidden">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Visualization Area -->
+        <main class="main-content">
+            <nav class="main-tabs">
+                <button class="tab-btn active" data-target="map-view"><i class="fas fa-map"></i> 2D/3D Map View</button>
+                <button class="tab-btn" data-target="cross-section-view"><i class="fas fa-chart-line"></i> Cross
+                    Section</button>
+                <button class="tab-btn" data-target="data-view"><i class="fas fa-table"></i> Raw Data</button>
+            </nav>
+
+            <div class="tab-content glass-panel" id="map-view">
+                <div class="controls-overlay">
+                    <select id="plot-variable">
+                        <option value="coulomb">Coulomb Stress</option>
+                        <option value="shear">Shear Stress</option>
+                        <option value="normal">Normal Stress</option>
+                        <option value="ux">Displacement X</option>
+                        <option value="uy">Displacement Y</option>
+                        <option value="uz">Displacement Z</option>
+                    </select>
+                    <button id="toggle-3d" class="btn-icon" title="Toggle 3D View"><i class="fas fa-cube"></i></button>
+                </div>
+                <div id="plotly-map" style="width: 100%; height: 100%;"></div>
+                <div class="empty-state" id="map-empty">
+                    <i class="fas fa-globe-americas fa-3x"></i>
+                    <p>Run a calculation to see the map</p>
+                </div>
+            </div>
+
+            <div class="tab-content glass-panel hidden" id="cross-section-view">
+                <div class="controls-overlay">
+                    <div class="slice-controls">
+                        <input type="number" id="slice-y" placeholder="Slice at Y (km)" value="0">
+                        <button id="btn-slice" class="btn-secondary btn-sm">Extract Slice</button>
+                    </div>
+                    <select id="slice-variable">
+                        <option value="coulomb">Coulomb Stress</option>
+                        <option value="uz">Displacement Z</option>
+                    </select>
+                </div>
+                <div id="plotly-cross" style="width: 100%; height: 100%;"></div>
+                <div class="empty-state" id="cross-empty">
+                    <i class="fas fa-chart-area fa-3x"></i>
+                    <p>Run a grid calculation to extract cross sections</p>
+                </div>
+            </div>
+
+            <div class="tab-content glass-panel hidden" id="data-view">
+                <div class="data-header">
+                    <h3>Calculation Results</h3>
+                    <a id="download-btn" href="#" class="btn-primary btn-sm hidden" download><i
+                            class="fas fa-download"></i> Download .dat</a>
+                </div>
+                <div class="table-container">
+                    <table id="results-table" class="hidden">
+                        <thead>
+                            <tr id="table-head-row"></tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="data-empty">
+                    <i class="fas fa-database fa-3x"></i>
+                    <p>No data available</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+
+</html>

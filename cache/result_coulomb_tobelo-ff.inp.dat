@@ -1,0 +1,3 @@
+x y z strike dip rake shear normal coulomb
+(km) (km) (km) (deg) (deg) (deg) (bar) (bar) (bar)
+    0.0000    0.0000  -10.0000   30.0  90.0   180.0    0.2944   -0.1721    0.2256 
