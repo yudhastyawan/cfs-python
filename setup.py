@@ -6,14 +6,14 @@ with open(os.path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="pycfs-dashboard",
+    name="cfs-python",
     version="0.1.0",
-    description="Python-based Coulomb Stress Change UI Dashboard and API",
+    description="Python-based Coulomb Stress Change UI and API",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Yudha Styawan",
     author_email="yudhastyawan97@gmail.com",
-    url="https://github.com/yudhastyawan/pycfs-dashboard",
+    url="https://github.com/yudhastyawan/cfs-python",
     packages=find_packages(include=["cfs_lib", "cfs_lib.*"]),
     py_modules=["app_panel"],
     install_requires=[
